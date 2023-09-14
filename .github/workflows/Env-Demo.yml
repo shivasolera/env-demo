@@ -4,8 +4,15 @@ on:
     branches:
       - main
       - dev
+env:
+  MONGODB_DB_NAME: ENV-DEMO
 jobs:
   test:
+    env:
+      MONGODB_CLUSTER_ADRESS: cluster0.15pwqcc.mongodb.net
+      MONGODB_USERNAME: shiva123
+      MONGODB_PASSWORD: ghhkauhsdahs
+      PORT: 8080
     environment: testing
     runs-on: ubuntu-latest
     steps:
@@ -19,11 +26,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run server
-        run: npm start & npx wait-on http://127.0.0.1:XYZ
+        run: npm start & npx wait-on http://127.0.0.1:${{ PORT }}
       - name: Run tests
         run: npm test
       - name: Output information
         run: echo "..."
+      - name: env value
+        run: |
+           echo "MONGODB_USERNAME: ${{ env.MONGODB_USERNAME }}"   
   deploy:
     needs: test
     runs-on: ubuntu-latest
@@ -31,3 +41,9 @@ jobs:
       - name: Output information
         run: |        
           echo "..."
+      # here we don't get the value of username because the env values is job specific(test)
+      # if you the env values to shared accross the workflow you should define them above job.
+      - name: env value 
+        run: |
+           echo "MONGODB_USERNAME: ${{ env.MONGODB_USERNAME }}" 
+           echo "MONGODB_DB_NAME: ${{ env.MONGODB_DB_NAME }}"
